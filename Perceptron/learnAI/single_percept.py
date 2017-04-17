@@ -6,18 +6,20 @@ Created on Mar 25, 2017
 from functools import reduce
 import matplotlib.pyplot as plt
 import numpy as np
+import regex as re
 
-lst_weight = []
-lst_bias = []
-lst_delta = []
+
+global lst_weight
+global lst_bias
+global lst_delta
 
 
 class single_percept( object ):
 
     def __init__( self, input_num, activator ):
-        global lst_weight
-        global lst_bias
-        global lst_delta
+        #global lst_weight
+        #global lst_bias
+        #global lst_delta
         '''
         Constructor       
         '''
@@ -55,8 +57,8 @@ class single_percept( object ):
                 self._one_iteration( input_vecs, targets, rate )
                 
     def _one_iteration( self, input_vecs, targets, rate ):
-        global lst_weight
-        global lst_bias
+        #global lst_weight
+        #global lst_bias
 
 
         '''
@@ -75,7 +77,7 @@ class single_percept( object ):
             lst_bias.append(self.bias)
             
     def _update_weights( self, input_vec, output, target, rate ):
-        global lst_delta
+        #global lst_delta
         '''
                     按照感知器规则更新权重
         '''
@@ -151,9 +153,9 @@ def test_plot():
     plt.show()
 
 if __name__ == '__main__':
-    global lst_weight
-    global lst_bias
-    global lst_delta
+    lst_weight = []
+    lst_bias = []
+    lst_delta = []
 
     #test_plot()
 
@@ -185,4 +187,6 @@ if __name__ == '__main__':
 
     #ax = plt.subplot(111)
     #plt.show()
+
+
 
