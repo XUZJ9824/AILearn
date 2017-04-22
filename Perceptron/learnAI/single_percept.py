@@ -108,6 +108,7 @@ def f_and( x ):
         定义激活函数f
     '''
     return 1 if x > 0.5 else 0
+    #return x
 
 def get_training_dataset():
     '''

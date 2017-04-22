@@ -84,8 +84,9 @@ def train_lstm():
     saver = tf.train.Saver()
 
     with tf.Session() as sess:
-        # sess.run(tf.global_variables_initializer())
-        sess.run(tf.initialize_all_variables())
+        sess.run(tf.global_variables_initializer())
+        # sess.run(tf.initialize_all_variables())
+
         # 重复训练2次,源程序为10000次
         for i in range(3):
             step = 0
@@ -102,7 +103,7 @@ def train_lstm():
                 step += 1
 
 
-train_lstm()
+
 
 
 # ————————————————预测模型————————————————————
@@ -129,4 +130,5 @@ def prediction():
         plt.plot(list(range(len(normalize_data), len(normalize_data) + len(predict))), predict, color='r')
         plt.show()
 
+train_lstm()
 prediction()
