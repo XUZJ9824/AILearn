@@ -1,45 +1,77 @@
 __author__ = 'CQC'
 # -*- coding:utf-8 -*-
 
-import urllib
-import urllib3
+#encoding:UTF-8
+import urllib.request
 import re
+import urllib
+from collections import deque
 
 
-class Spider:
-    def __init__(self):
-        self.siteURL = 'http://mm.taobao.com/json/request_top_list.htm'
+def test1():
+    url = "http://www.baidu.com"
+    data = urllib.request.urlopen(url).read()
+    data = data.decode('UTF-8')
+    print(data)
+    return
 
-    def getPage(self, pageIndex):
-        url = self.siteURL + "?page=" + str(pageIndex)
-        print(url)
-        #request = urllib.Request(url)
-        #request = urllib.request.urlopen(url)
+def test2():
+    data = {}
+    data['word'] = 'Jecvay Notes'
 
-        #response = urllib.urlopen(request)
-        #return response.read().decode('gbk')
-        #return request.decode('gbk')
-        http = urllib3.PoolManager()
-        r = http.request('GET', url)
-        r.status
-        return (r.data)
+    url_values = urllib.parse.urlencode(data)
+    url = "http://www.baidu.com/s?"
+    full_url = url + url_values
 
-    def getContents(self, pageIndex):
-        page = self.getPage(pageIndex)
-        pattern = re.compile(
-            '<div class="list-item".*?pic-word.*?<a href="(.*?)".*?<img src="(.*?)".*?<a class="lady-name.*?>(.*?)</a>.*?<strong>(.*?)</strong>.*?<span>(.*?)</span>',
-            re.S)
-        items = re.findall(pattern, page)
-        for item in items:
-            print
-            item[0], item[1], item[2], item[3], item[4]
+    data = urllib.request.urlopen(full_url).read()
+    data = data.decode('UTF-8')
+    print(data)
+    return
+
+def test3():
+    data = {}
+
+    queue = deque()
+    visited = set()
+
+    url = 'https://www.baidu.com/s?word=Jecvay+Notes'  # 入口页面, 可以换成别的
+    queue.append(url)
+
+    url = 'https://www.baidu.com'
+    queue.append(url)
+
+    cnt = 0
+
+    while queue:
+        url = queue.popleft()  # 队首元素出队
+        visited |= {url}  # 标记为已访问
+
+        print('已经抓取: ' + str(cnt) + '   正在抓取 <---  ' + url)
+        cnt += 1
+        #urlop = urllib.request.urlopen(url)
+        #if 'html' not in urlop.getheader('Content-Type'):
+        #    continue
+
+        # 避免程序异常中止, 用try..catch处理异常
+        #try:
+        #data = urlop.read().decode('utf-8')
+
+        data = urllib.request.urlopen(url).read()
+        data = data.decode('UTF-8')
+
+        print(data)
+        #except:
+        #    continue
+
+        # 正则表达式提取页面中所有队列, 并判断是否已经访问过, 然后加入待爬队列
+        linkre = re.compile('href=\"(.+?)\"')
+        for x in linkre.findall(data):
+            if 'http' in x and x not in visited:
+                queue.append(x)
+                print('加入队列 --->  ' + x)
+
 
 if __name__ == '__main__':
-    http = urllib3.PoolManager()
-    r = http.request('GET', 'http://www.baidu.com/')
-    r.status
-    print(r.data)
-
-    print(help('urllib3'))
-    #spider = Spider()
-    #spider.getContents(1)
+    #test1()
+    #test2()
+    test3()
