@@ -9,15 +9,32 @@ from collections import deque
 
 
 def test1():
-    url = "http://www.baidu.com"
-    data = urllib.request.urlopen(url).read()
-    data = data.decode('UTF-8')
-    print(data)
+    queue = deque()
+    visited = set()
 
-    linkre = re.compile('href=\"(.+?)\"')
-    for x in linkre.findall(data):
-        if 'http' in x:
-            print('加入队列 --->  ' + x)
+    url = "http://www.baidu.com"
+    queue.append(url)
+    url = 'https://www.baidu.com/s?word=Jecvay+Notes'
+    queue.append(url)
+
+    cnt = 0
+
+    while queue:
+        url=queue.popleft()
+        visited|={url}
+        print("Grab %s, %s" % (str(cnt),url))
+
+        cnt +=1
+        data = urllib.request.urlopen(url).read()
+        data = data.decode('UTF-8')
+        print(data)
+
+        linkre = re.compile('href=\"(.+?)\"')
+        for x in linkre.findall(data):
+            if 'http' in x and x not in visited:
+                queue.append(x)
+                print('Add Queue --->  ' + x)
+
     return
 
 def test2():
@@ -79,4 +96,4 @@ def test3():
 if __name__ == '__main__':
     test1()
     #test2()
-    test3()
+    #test3()
