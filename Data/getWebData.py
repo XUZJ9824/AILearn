@@ -13,6 +13,11 @@ def test1():
     data = urllib.request.urlopen(url).read()
     data = data.decode('UTF-8')
     print(data)
+
+    linkre = re.compile('href=\"(.+?)\"')
+    for x in linkre.findall(data):
+        if 'http' in x:
+            print('加入队列 --->  ' + x)
     return
 
 def test2():
@@ -72,6 +77,6 @@ def test3():
 
 
 if __name__ == '__main__':
-    #test1()
+    test1()
     #test2()
     test3()
