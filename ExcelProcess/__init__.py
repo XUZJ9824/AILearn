@@ -66,6 +66,7 @@ def check_immr_untracked_task():
 
     task_in_y2016 = set(
         [
+            '13387',
             '815',
             '1357',
             '1327',
@@ -254,13 +255,13 @@ if __name__ == '__main__':
     #os.system(r'cmd.exe copy /Y C:\Users\e427632\Google Drive\Lns\IMMR\ABM_Report.xlsm Q:\IMMR Airbus\ProjectHandbook\ABMs\ABMS\HSW\ABM_Report.xlsm')
     #os.system(r'cmd.exe copy /Y C:\Users\e427632\Google Drive\Lns\IMMR\ABM_Report.xlsm Y:\P_CommNav\Projects\IMMR_Airbus\Snapshot_Quantum\IMMR Airbus\ProjectHandbook\ABMs\ABMS\HSW\ABM_Report.xlsm')
 
-    #sync_ABMs()
+    sync_ABMs()
 
-    #update_ABM_task()
+    update_ABM_task()
 
     check_immr_untracked_task()
     #msg_box('1','2')
 
-    #update_used_hours()
+    update_used_hours()
 
     input('press any key to continue!')
