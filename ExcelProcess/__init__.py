@@ -1,6 +1,13 @@
+import win32com.client
+import os, shutil, errno
 import xlrd
+import xlsxwriter
+import openpyxl
 import re
 import matplotlib.pyplot as plt
+from pandas import Series, DataFrame
+import pandas as pd
+
 #from PyQt4 import QtCore, QtGui #in the pyqt4 tutorials
 #from PyQt5 import QtCore, QtGui, QtWidgets #works for pyqt5
 #from PyQt5.QtWidgets import QtGui, QtCore
@@ -10,10 +17,12 @@ import sys
 
 import string
 
-def check_immr_untracked_task():
-    xls_IMMR_Task_List = 'Y:\P_CommNav\Projects\IMMR_Airbus\Snapshot_Quantum\IMMR Airbus\ProjectHandbook\Financials\WeeklyActuals\Wkly_TT_Report\QueryResult.xls'
-    xls_IMMR_ABM_Report = 'C:\\Users\\e427632\\Google Drive\\Lns\IMMR\\ABM_Report.xlsm'
+global xls_IMMR_Task_List
+global xls_IMMR_ABM_Report
+global xls_BJ_Effort
 
+def check_immr_untracked_task():
+    print('check_immr_untracked_task\n')
     wk_task_list = xlrd.open_workbook(xls_IMMR_Task_List)
     sheet_task_list = wk_task_list.sheet_by_index(0)
 
@@ -21,6 +30,7 @@ def check_immr_untracked_task():
     sheet_abm_task = wk_abm_report.sheet_by_name('Report')
 
     #get 2nd column from ABM Task
+    setTaskABM = set()
     taskABM = []
     for rownum in range(1, sheet_abm_task.nrows):
         taskABM.append(str(sheet_abm_task.cell(rownum, 2).value))
@@ -30,10 +40,12 @@ def check_immr_untracked_task():
         #if( temp.startswith('1AR000')):
         #    temp = temp[6:]
         temp = re.sub('1AR0*0','',temp)
+        temp = re.sub(' *', '', temp)
         if( temp.endswith('.0')):
             temp = temp[:len(temp)-2]
 
         taskABM[-1] = temp
+        setTaskABM|= {temp}
 
     #get 1st column from CQ Task List
     taskCQ = []
@@ -52,8 +64,14 @@ def check_immr_untracked_task():
         taskCQ[-1][0] = temp
 
 
-    task_in_y2016 = \
-        [   '739',
+    task_in_y2016 = set(
+        [
+            '815',
+            '1357',
+            '1327',
+            '872',
+            '1183',
+            '739',
             '746',
             '858',
             '13329',
@@ -136,14 +154,17 @@ def check_immr_untracked_task():
             '13487',
             '13535',
             '13555',
-        ]
+        ])
+
+    print('setTaskABM' + str(setTaskABM))
+    print('task_in_y2016' + str(task_in_y2016))
 
     task_missed = [[]]
     for index in range(len(taskCQ)):
-        rt = str_in_list((taskCQ[index])[0], taskABM)
-        rt = rt or str_in_list((taskCQ[index])[0], task_in_y2016)
+        #rt = str_in_list((taskCQ[index])[0], taskABM)
+        #rt = rt or str_in_list((taskCQ[index])[0], task_in_y2016)
 
-        if( not rt ):
+        if( (not (taskCQ[index])[0] in setTaskABM) and ( not (taskCQ[index])[0] in task_in_y2016) ):
             task_missed.append(taskCQ[index])
             print("\nmissed task ", taskCQ[index])
 
@@ -159,10 +180,87 @@ def str_in_list(astr, lst):
         #print("missed task %s" % astr)
 
     return rt
+def sync_ABMs():
+    print('sync_ABMs\n')
+    os.system('Y:\P_CommNav\Projects\IMMR_Airbus\Snapshot_Quantum\Sync_ABM.bat')
+    #src = 'Q:\IMMR Airbus\ProjectHandbook\ABMs\ABMS\HSW'
+    #dst = 'Y:\\P_CommNav\\Projects\\IMMR_Airbus\\Snapshot_Quantum\\IMMR Airbus\\ProjectHandbook\\ABMs\ABMS\\HSW'
+    #try:
+    #    shutil.copytree(src, dst)
+    #    #shutil.copy(src, dst)
+    #except OSError as exc:  # python >2.5
+    #    # File already exist
+    #    if exc.errno == errno.EEXIST:
+    #        shutil.copy(src, dst)
+    #    # The dirtory does not exist
+    #    if exc.errno == errno.ENOENT:
+    #        shutil.copy(src, dst)
+    #    else:
+    #        raise
+
+def update_ABM_task():
+    print('update_ABM_task\n')
+    xl = win32com.client.Dispatch("Excel.Application")
+    xl.Workbooks.Open(Filename = xls_IMMR_ABM_Report, ReadOnly = 1)
+    xl.Application.Run("cmd_Update")
+    xl.Workbooks(1).Close(SaveChanges = 0)
+    xl.Application.Quit()
+    xl = 0
+
+def update_used_hours():
+    print('update_used_hours\n')
+
+    xlsSAP = xlrd.open_workbook(xls_BJ_Effort)
+    sheetSAP = xlsSAP.sheet_by_index(0)
+    #xlsABMReport = openpyxl.Workbook(xls_IMMR_ABM_Report)
+    #sheetEffort = xlsABMReport.get_sheet_by_name('Effort')
+
+    lst_WBS = [['AE-00003689-001-0010','IMMR BITE Coding and Test', '0'],
+               ['AE-00003689-001-0011','IMMR SW Host Engr Support','0'],
+               ['AE-00003689-001-0012','IMMR IO Host SW Req','0'],
+               ['AE-00003689-001-0013','IMMR IO HOST Code and Test','0'],
+               ['AE-00003689-001-0014','L2 Interactive Req','0'],
+               ['AE-00003689-001-0015','L2 Interactive Code','0'],
+               ['AE-00003689-001-0016', 'L2 FLS Req', '0'],
+               ['AE-00003689-001-0017', 'L2 FLS Code', '0'],
+               ]
+    lst_wbs_effort = []
+    #for rownum in range(2, sheetEffort.nrows):
+    #    lst_WBS.append(sheetEffort.cell(rownum,2).value)
+
+    lst_sap_effort=[] #SAP export effort list
+    for rownum in range(2, sheetSAP.nrows):
+        if(len(sheetSAP.cell(rownum,6).value) > 0):
+            t = (sheetSAP.cell(rownum,6).value, sheetSAP.cell(rownum,16).value)
+            lst_sap_effort.append(list(t))
+            for wbs in range(0,len(lst_WBS)):
+                if(lst_WBS[wbs][0]== sheetSAP.cell(rownum,6).value ):
+                    lst_WBS[wbs][2] = float(lst_WBS[wbs][2]) +  float(sheetSAP.cell(rownum,16).value)
+                    break
+
+    #print(lst_WBS)
+    for ele in lst_WBS:
+        print(ele)
 
 #def msg_box(str1, str2):
     #QtWidgets.QMessageBox.about("My message box", "Text1 = %s, Text2 = %s" % ('T1', 'T2') )
 
 if __name__ == '__main__':
+    xls_IMMR_Task_List = r'Y:\P_CommNav\Projects\IMMR_Airbus\Snapshot_Quantum\IMMR Airbus\ProjectHandbook\Financials\WeeklyActuals\Wkly_TT_Report\QueryResult.xls'
+    xls_IMMR_ABM_Report = r'C:\Users\e427632\Google Drive\Lns\IMMR\ABM_Report.xlsm'
+    xls_BJ_Effort = r'Y:\Process\SAP\Effort_2017\CNS_BJ_Effort_By_Now.xlsX'
+    xls_TT_Task_Report = r'Y:\P_CommNav\Projects\IMMR_Airbus\Snapshot_Quantum\IMMR Airbus\ProjectHandbook\Financials\WeeklyActuals\Wkly_TT_Report\IMMR_SpendReports.xlsx'
+
+    #os.system(r'cmd.exe copy /Y C:\Users\e427632\Google Drive\Lns\IMMR\ABM_Report.xlsm Q:\IMMR Airbus\ProjectHandbook\ABMs\ABMS\HSW\ABM_Report.xlsm')
+    #os.system(r'cmd.exe copy /Y C:\Users\e427632\Google Drive\Lns\IMMR\ABM_Report.xlsm Y:\P_CommNav\Projects\IMMR_Airbus\Snapshot_Quantum\IMMR Airbus\ProjectHandbook\ABMs\ABMS\HSW\ABM_Report.xlsm')
+
+    #sync_ABMs()
+
+    #update_ABM_task()
+
     check_immr_untracked_task()
     #msg_box('1','2')
+
+    #update_used_hours()
+
+    input('press any key to continue!')
