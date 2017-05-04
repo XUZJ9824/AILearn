@@ -6,6 +6,7 @@ import urllib.request
 import re
 import urllib
 from collections import deque
+import sys
 
 
 def test1():
@@ -19,15 +20,20 @@ def test1():
 
     cnt = 0
 
-    while queue:
+    while queue and (cnt < 200):
         url=queue.popleft()
         visited|={url}
         print("Grab %s, %s" % (str(cnt),url))
 
         cnt +=1
-        data = urllib.request.urlopen(url).read()
-        data = data.decode('UTF-8')
-        print(data)
+        try:
+            data = urllib.request.urlopen(url).read()
+            data = data.decode('UTF-8')
+        except Exception as err:
+            print('Error : ' + str(err))
+            continue
+
+        #print(data)
 
         linkre = re.compile('href=\"(.+?)\"')
         for x in linkre.findall(data):
