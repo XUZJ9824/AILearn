@@ -1,0 +1,18 @@
+[Site]
+#Choice BJ or SH
+BJ
+
+[Work Center]
+#Choice 373C100012 for CNS BJ, 385C100108 for CNS SH, 
+373C100012
+
+[Mail Recipient]
+#mail address to get the result notification with ";" separate multiple people;
+zhijian.xu@honeywell.com;
+
+[SAP Profile Name]
+#Your Profile Name used to login SAP, by default we name like 1.13 ERQ - ECC 6.0 Corp QA; CORP SAP ECC 6.0 Systems in SAP
+SAP HTSC
+
+[END]
+##########Any other text after this will be information only ###################
