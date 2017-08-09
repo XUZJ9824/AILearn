@@ -5,6 +5,8 @@ Created on Mar 25, 2017
 '''
 
 import os
+import sys
+from PyQt5.QtWidgets import QApplication, QWidget
 
 
 if __name__ == '__main__':
@@ -59,3 +61,12 @@ if __name__ == '__main__':
     print(lm4X3)
     lm4X3_2 = list(map(list,zip(*m3X4)))
     print(lm4X3_2)
+
+    #QT5
+    app = QApplication(sys.argv)
+
+    w = QWidget()
+    w.resize(250, 150)
+    w.move(300, 300)
+    w.setWindowTitle('Simple')
+    w.show()
