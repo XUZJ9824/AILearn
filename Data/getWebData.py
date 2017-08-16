@@ -7,6 +7,7 @@ import re
 import urllib
 from collections import deque
 import sys
+from itertools import groupby
 
 
 def test1():
@@ -98,8 +99,23 @@ def test3():
                 queue.append(x)
                 print('加入队列 --->  ' + x)
 
+def split(l):
+  r = []
+  last = -1
+  for i in l:
+    if last == i:
+      r[-1].append(i)
+    else:
+      r.append([i])
+      last = i
+
+  #another way to make the same result
+  r2 = list(map(lambda x: list(x[1]), groupby([0, 0, 0, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0])))
+  return r
 
 if __name__ == '__main__':
-    test1()
+    #test1()
     #test2()
     #test3()
+    l1 = [0, 0, 0, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0]
+    l2 = split(l1);
