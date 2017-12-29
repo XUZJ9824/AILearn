@@ -14,13 +14,13 @@ def test1():
     queue = deque()
     visited = set()
 
-    url = "http://www.baidu.com"
+    url = "http://www.fanhaoquan.com/"
     queue.append(url)
-    url = 'https://www.baidu.com/s?word=Jecvay+Notes'
-    queue.append(url)
+    #url = 'https://www.baidu.com/s?word=Jecvay+Notes'
+    #queue.append(url)
 
     cnt = 0
-
+    imgcnt = 0
     while queue and (cnt < 200):
         url=queue.popleft()
         visited|={url}
@@ -40,7 +40,20 @@ def test1():
         for x in linkre.findall(data):
             if 'http' in x and x not in visited:
                 queue.append(x)
-                print('Add Queue --->  ' + x)
+                #print('Add Queue --->  ' + x)
+
+        imgre = re.compile('img data-original=\"(.+?)\"')
+        for x in imgre.findall(data):
+            print('img %d %s' % (cnt, x))
+            f = open(str(imgcnt) + '.jpg', 'wb')
+            try:
+                reqimg = urllib.request.urlopen(x)
+            except Exception as err:
+                print('Error : ' + str(err))
+                continue
+            buf = reqimg.read()
+            f.write(buf)
+            imgcnt = imgcnt + 1
 
     return
 
@@ -114,7 +127,7 @@ def split(l):
   return r
 
 if __name__ == '__main__':
-    #test1()
+    test1()
     #test2()
     #test3()
     l1 = [0, 0, 0, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0]
